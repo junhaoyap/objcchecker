@@ -25,7 +25,13 @@ fs.readdir(fileDirectory, (error, fileNames) => {
 
       if (fileName.substring(fileName.length - 1, fileName.length) === 'm' ||
           fileName.substring(fileName.length - 1, fileName.length) === 'h') {
-            fs.readFile(fileName, 'utf8', (error, data) => {
+            // NOTE: Skip directories for now, no recursion
+            if (fs.lstatSync(`${fileDirectory}/${fileName}`).isDirectory() ||
+                fileName.includes('PM') || fileName.includes('+')) {
+              return;
+            }
+
+            fs.readFile(`${fileDirectory}/${fileName}`, 'utf8', (error, data) => {
               if (error) {
                 throw error;
                 console.log(error);
@@ -41,8 +47,8 @@ fs.readdir(fileDirectory, (error, fileNames) => {
 
                 // Temporary solution for MVP solution, ignore Macros, class extensions, imported frameworks and Swift header
                 // NOTE: This is not the final amount of things to be excluded for this MVP
-                if (line.includes('WMLMacros') || line.includes('+') || line.includes('-Swift') || line.includes('<') ||
-                    line.includes('Gender')) {
+                if (line.includes('WMLMacros') || line.includes('+') || line.includes('-Swift') ||
+                    line.includes('Gender') || (line.includes('<') && !line.includes('interface'))) {
                   continue;
                 }
 
@@ -103,7 +109,7 @@ fs.readdir(fileDirectory, (error, fileNames) => {
 
               // TODO: Find a better way to write out test files
               // NOTE: To test, append other name to file so that it does not overwrite
-              fs.writeFile(`${fileName}`, rebuiltFileLines, (error) => {
+              fs.writeFile(`${fileDirectory}/${fileName}`, rebuiltFileLines, (error) => {
                 if (error) {
                   throw error;
                   console.log(error);
