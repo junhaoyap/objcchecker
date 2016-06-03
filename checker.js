@@ -45,14 +45,19 @@ fs.readdir(fileDirectory, (error, fileNames) => {
                   continue;
                 }
 
-                // Temporary solution for MVP solution, ignore Macros, class extensions, imported frameworks and Swift header
-                // NOTE: This is not the final amount of things to be excluded for this MVP
-                if (line.includes('WMLMacros') || line.includes('+') || line.includes('-Swift') ||
-                    line.includes('Gender') || (line.includes('<') && !line.includes('interface'))) {
-                  continue;
-                }
-
                 if (line.includes('#import')) {
+                  // Temporary solution for MVP solution, ignore Macros, class extensions, imported frameworks and Swift header
+                  // NOTE: This is not the final amount of things to be excluded for this MVP
+                  if (line.includes('WMLMacros') || line.includes('+') || line.includes('-Swift') ||
+                      line.includes('Gender') || line.includes('WMLConstants') || line.includes('WYPopover') ||
+                      line.includes('viewModel') || line.includes('ViewModel') || line.includes('<') ||
+                      line.includes('Constants') || line.includes('WMLFlyingViewsService') ||
+                      line.includes('WMLStoreBranding') || line.includes('WMLAPIClient') || line.includes('WMLStoreShipping') ||
+                      line.includes('WMLPaymentDetails') || line.includes('WMLDeal') || line.includes('delegate') || line.includes('Delegate') ||
+                      line.includes('Protocol') || line.includes('protocol')) {
+                    continue;
+                  }
+
                   // Pick out the import name and add it into our imports array
                   const stringOpeningQuoteIndex = line.indexOf('"');
                   const importedHeader = line.substring(stringOpeningQuoteIndex + 1, line.length - 3);
@@ -90,7 +95,8 @@ fs.readdir(fileDirectory, (error, fileNames) => {
                 for (let i = 0; i < splitLines.length; i++) {
                   const fileLine = splitLines[i];
 
-                  if (fileLine.includes(unusedImport)) {
+                  // Adding #import so that it doesn't delete other lines by accident..
+                  if (fileLine.includes(unusedImport) && fileLine.includes('#import')) {
                   // XXX: Really really terrible solution, to be improved
                     splitLines.splice(i, 1);
                     i--;
